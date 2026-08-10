@@ -1,0 +1,31 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    platform: linux/amd64
+    container_name: glpi-mariadb-test
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: glpi
+      MYSQL_USER: glpi
+      MYSQL_PASSWORD: glpipass123
+    volumes:
+      - glpi_db_data:/var/lib/mysql
+
+  glpi:
+    image: diouxx/glpi
+    platform: linux/amd64
+    container_name: glpi-test
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      TIMEZONE: America/Bogota
+    depends_on:
+      - mariadb
+    volumes:
+      - glpi_app_data:/var/www/html/glpi
+
+volumes:
+  glpi_db_data:
+  glpi_app_data:

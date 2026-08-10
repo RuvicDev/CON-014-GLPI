@@ -1,0 +1,25 @@
+{
+  "id": "glpi",
+  "name": "GLPI",
+  "name_en": "GLPI",
+  "version": "1.0.0",
+  "description": "Gestión de tickets en GLPI: crear ticket, actualizar ticket, consultar ticket y agregar seguimiento",
+  "description_en": "GLPI ticket management: create ticket, update ticket, retrieve ticket and add follow-up",
+  "category": "ITSM / Ticketing",
+  "category_en": "ITSM / Ticketing",
+  "keywords": ["glpi", "ticket", "tickets", "itsm", "helpdesk", "seguimiento"],
+  "icon": "icon.svg",
+  "library": {"package": "ruvic-glpi-connector", "install": "pip install git+https://github.com/tu-org/conector-glpi.git#subdirectory=lib", "import_name": "ruvic_glpi_connector"},
+  "auth_modes": [{"id": "app_user_token", "label": "App Token + User Token", "fields": [
+    {"key": "base_url", "label": "URL base GLPI", "type": "text", "required": true, "placeholder": "http://localhost:8080"},
+    {"key": "app_token", "label": "App Token", "type": "password", "secret": true, "required": true},
+    {"key": "user_token", "label": "User Token", "type": "password", "secret": true, "required": true},
+    {"key": "verify_ssl", "label": "Verificar SSL", "type": "boolean", "required": false, "default": "true"},
+    {"key": "timeout", "label": "Timeout (segundos)", "type": "number", "required": false, "default": "20"},
+    {"key": "max_results", "label": "Máximo resultados", "type": "number", "required": false, "default": "100"}
+  ]}],
+  "env_prefix": "RUVIC_GLPI_",
+  "operations": ["ticket.create_ticket", "ticket.update_ticket", "ticket.get_ticket", "ticket.add_followup"],
+  "test_connection": true,
+  "docs": {"skill": "SKILL.md", "permissions_note": "El usuario/token GLPI debe tener permisos para crear, consultar, actualizar tickets y agregar seguimientos. La API REST debe estar habilitada y se requiere App Token."}
+}
