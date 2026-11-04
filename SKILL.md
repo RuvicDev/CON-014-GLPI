@@ -34,32 +34,50 @@ from ruvic_glpi_connector import GlpiClient
 client = GlpiClient()
 ```
 
+## Valores válidos (no hace falta leer el código)
+
+| Campo | Valores |
+|---|---|
+| `status` | 1 Nuevo, 2 En curso (asignado), 3 En curso (planificado), 4 En espera, 5 Resuelto, 6 Cerrado. Acepta el número o el nombre |
+| `urgency` / `impact` | 1 Muy baja, 2 Baja, 3 Media, 4 Alta, 5 Muy alta. Acepta el número o el nombre ("alta") |
+| `priority` | 1 a 6 (6 = Mayor). GLPI la recalcula con la matriz urgencia x impacto |
+
+Los IDs son enteros (`10` o `"10"`); un ID no numérico o inexistente lanza `GlpiDataError` con un mensaje claro.
+Un valor fuera de rango, un estado desconocido o un campo que no existe en el ticket también lanzan `GlpiDataError`; no se envía nada a GLPI.
+
 ## Capacidad 1 — Crear ticket
 
+`create_ticket(title, content, urgency=3, impact=3, priority=3, **extra_fields)` devuelve el ticket creado completo (`id`, `status`, `urgency`, `priority`...).
+
 ```python
-ticket = client.create_ticket("Error de acceso", "El usuario no puede iniciar sesión")
-print(ticket)
+ticket = client.create_ticket("Error de acceso", "El usuario no puede iniciar sesión", urgency="alta")
+print(ticket["id"], ticket["status"])
 ```
 
 ## Capacidad 2 — Actualizar ticket
 
+`update_ticket(ticket_id, fields)` devuelve el ticket tal como quedó tras el cambio.
+
 ```python
-updated = client.update_ticket(10, {"priority": 4})
-print(updated)
+updated = client.update_ticket(10, {"status": "En curso (asignado)"})
+updated = client.update_ticket(10, {"status": 5})  # Resuelto
+print(updated["status"])
 ```
 
 ## Capacidad 3 — Consultar ticket
 
 ```python
 ticket = client.get_ticket(10)
-print(ticket)
+print(ticket["name"], ticket["status"], ticket["urgency"], ticket["priority"])
 ```
 
 ## Capacidad 4 — Agregar seguimiento
 
+`add_followup(ticket_id, content, is_private=False)`. Con `is_private=True` el seguimiento solo lo ven los técnicos.
+
 ```python
-followup = client.add_followup(10, "Se contactó al usuario y se escaló a N2")
-print(followup)
+client.add_followup(10, "Se contactó al usuario y se escaló a N2")
+client.add_followup(10, "Nota interna para el equipo", is_private=True)
 ```
 
 ## Manejo de errores
@@ -85,3 +103,4 @@ except GlpiDataError as exc:
 3. Cierra sesión con `client.close()` al finalizar scripts largos.
 4. Confirma con el usuario antes de crear o actualizar tickets reales.
 5. No implementes eliminación de tickets; no está soportada en este conector.
+6. No cambies el estado de otros tickets para "restaurarlos" si el usuario no lo pidió.
